@@ -44,7 +44,7 @@ services:
 
   rtview-history-db:
     # image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
-	image: slcorp/mysql-rtview:latest
+    image: slcorp/mysql-rtview:latest
     ports:
       - "3306"
     networks:
