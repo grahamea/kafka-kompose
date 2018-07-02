@@ -1,0 +1,87 @@
+version: "2"
+services:
+
+  rtview-dataserver-kafka:
+    # replace username/repo:tag with your name and image details
+    image: grahamea/test5:latest
+    # EXPOSE 3779 3778 3776 3775 3772 3770 3769 3768 3767 3766 3761
+    ports:
+      - "3770:3770"  
+      - "3778" 
+      - "3776" 
+      - "3775" 
+      - "3772" 
+      - "3768" 
+      - "3767" 
+      - "3766"
+    labels:
+      # Expose this service when using kompose, on OpenShift create a route
+      kompose.service.expose: "true"
+    networks:
+      - rtview-kafka
+    volumes:
+      - project:/opt/RTViewDataServerSP/projects/my-sample-server
+      - cache:/opt/RTViewDataServerSP/projects/my-sample-server/cache
+      - logs:/opt/RTViewDataServerSP/projects/my-sample-server/logs
+      - ext:/opt/RTViewDataServerSP/projects/ext
+    environment:
+      DATASERVER_CMD_ARGS: -echo -verbose
+      RTV_HISTORY_DB: rtview-history-db:3306/RTVHISTORY
+      RTV_CONFIG_DB: rtview-config-db:3306/RTVCONFIG
+      HISTORIAN_DATACLIENT: //rtview-dataserver-kafka:3778
+
+  rtview-historian:
+    # replace username/repo:tag with your name and image details
+    image: grahamea/test6:latest
+    ports:
+      - "3776"
+    networks: 
+      - rtview-kafka
+    environment:
+      HISTORIAN_CMD_ARGS: -echo -verbose -verbose2
+      RTV_HISTORY_DB: rtview-history-db:3306/RTVHISTORY
+      HISTORIAN_DATACLIENT: //rtview-dataserver-kafka:3778
+
+  rtview-history-db:
+    image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+    ports:
+      - "3306"
+    networks:
+       - rtview-kafka
+    volumes:
+      - history-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: RTVHISTORY
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: my-secret-pw
+
+  rtview-config-db:
+    # image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+    # image: em-db-mysql-57:latest
+    image: grahamea/test4:latest
+    ports:
+      - "3306"
+    networks:
+      - rtview-kafka
+    volumes:
+      - config-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: RTVCONFIG
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: my-secret-pw
+
+networks:
+  rtview-kafka:
+
+volumes:
+  project:
+  cache:
+  logs:
+  ext:
+  history-db-data:
+  config-db-data:
+  
