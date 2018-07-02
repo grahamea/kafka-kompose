@@ -43,7 +43,8 @@ services:
       HISTORIAN_DATACLIENT: //rtview-dataserver-kafka:3778
 
   rtview-history-db:
-    image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+    # image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+	image: slcorp/mysql-rtview:latest
     ports:
       - "3306"
     networks:
